@@ -19,6 +19,8 @@ router.get('/', async(req,res)=>{
 })
 
 router.get('/:id', async(req,res)=>{
+
+    //javitani kell hibas a helyko
     const {id} = req.params
 
     let sql = `
@@ -32,6 +34,10 @@ router.get('/:id', async(req,res)=>{
 
     const [eredmeny] = await pool.query(sql,[id])
 
+    if (!Number.isInteger(Number(id)) ||Number(id) <= 0){
+        return res.status(400).json({error: "Az id csak szám lehet"})
+    }
+
     if (eredmeny.length === 0) {
     return res.status(404).json({ error: "A film nem található" })
     }   
@@ -44,8 +50,6 @@ router.get('/:id', async(req,res)=>{
         vetitesek: []
     }
     
-  
-
     eredmeny.forEach(vetitesek=>{
         filmek.vetitesek.push({
             id: vetitesek.vetitesId,
