@@ -7,6 +7,7 @@ const router = express.Router()
 
 //feladat megoldásához AI segítsége volt használva
 router.post('/', async(req,res)=>{
+
     const {vetitesId, nev, sor, szek} = req.body
 
     if (!Number.isInteger(Number(vetitesId)) || Number(vetitesId) < 1) {

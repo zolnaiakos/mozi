@@ -24,12 +24,16 @@ router.get('/:id', async(req,res)=>{
     const {id} = req.params
 
     let sql = `
-    SELECT f.id, f.cim, f.hossz, f.korhatar, t.id, t.nev AS terem, DATE_FORMAT(v.kezdes, '%Y-%m-%d %H:%i') AS kezdes, v.jegyar, (t.sorok  * t.szekek) AS ferohely
+      SELECT f.id AS filmId, f.cim, f.hossz, f.korhatar, t.id AS teremId, t.nev AS terem, DATE_FORMAT(v.kezdes, '%Y-%m-%d %H:%i') AS kezdes, v.jegyar,
+        (t.sorok * t.szekek) - (
+            SELECT COUNT(*)
+            FROM foglalasok c
+            WHERE c.vetites_id = v.id
+        ) AS szabadHely
     FROM filmek f
     LEFT JOIN vetitesek v ON v.film_id = f.id
-    LEFT JOIN termek t ON  t.id = v.terem_id
-    LEFT JOIN foglalasok c ON c.vetites_id = v.id
-    WHERE f.id = ?   
+    LEFT JOIN termek t ON t.id = v.terem_id
+    WHERE f.id = ?
 `   
 
     const [eredmeny] = await pool.query(sql,[id])
@@ -52,7 +56,7 @@ router.get('/:id', async(req,res)=>{
     
     eredmeny.forEach(vetitesek=>{
         filmek.vetitesek.push({
-            id: vetitesek.vetitesId,
+            teremId: vetitesek.teremId,
             terem: vetitesek.terem,
             kezdes: vetitesek.kezdes,
             jegyar: vetitesek.jegyar,
